@@ -55,6 +55,13 @@ impl GridPosition {
     pub fn to_idx(&self, width: u16) -> usize {
         (self.y as usize) * width as usize + (self.x as usize)
     }
+
+    pub fn transpose(&self) -> GridPosition {
+        GridPosition {
+            x: self.y,
+            y: self.x,
+        }
+    }
 }
 
 fn line(
@@ -64,12 +71,26 @@ fn line(
     width: u16,
     color: PixelBGRA,
 ) {
+    // steep slope
+    let steep = a.x.abs_diff(b.x) < a.y.abs_diff(b.y);
+
+    let (a, b) = if steep {
+        (a.transpose(), b.transpose())
+    } else {
+        (a, b)
+    };
+
+    let (a, b) = if a.x > b.x { (b, a) } else { (a, b) };
+
     let mut t = 0.;
-    for x in a.x..b.x {
+
+    for x in a.x..=b.x {
         let coord = GridPosition {
             x: ((a.x as f32) + ((b.x as f32) - (a.x as f32)) * t).round() as u16,
             y: ((a.y as f32) + ((b.y) as f32 - (a.y as f32)) * t).round() as u16,
         };
+        let coord = if steep { coord.transpose() } else { coord };
+
         pixel_data[coord.to_idx(width)] = color;
 
         t = ((x as f32) - (a.x as f32)) / (b.x as f32 - a.x as f32);
