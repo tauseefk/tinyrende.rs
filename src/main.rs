@@ -1,8 +1,15 @@
-use std::{char::UNICODE_VERSION, fs::File, io::Write, path::Path};
+mod grid_position;
+mod line;
+
+use std::{fs, fs::File, io::Write, path::Path};
 
 use anyhow::Error;
+use clap::{Arg, command};
 use rand::RngExt;
 use tgar::{BGRA, PixelBGRA};
+
+use crate::grid_position::GridPosition;
+use line::line;
 
 const BLACK: PixelBGRA = PixelBGRA {
     b: 0,
@@ -46,68 +53,23 @@ const YELLOW: PixelBGRA = PixelBGRA {
     a: 255,
 };
 
-#[derive(Copy, Clone)]
-struct GridPosition {
-    x: u16,
-    y: u16,
-}
-
-impl GridPosition {
-    pub fn to_idx(&self, width: u16) -> usize {
-        (self.y as usize) * width as usize + (self.x as usize)
-    }
-
-    pub fn transpose(&self) -> GridPosition {
-        GridPosition {
-            x: self.y,
-            y: self.x,
-        }
-    }
-}
-
-fn line(
-    a: GridPosition,
-    b: GridPosition,
-    pixel_data: &mut [PixelBGRA],
-    width: u16,
-    color: PixelBGRA,
-) {
-    // steep slope
-    let steep = a.x.abs_diff(b.x) < a.y.abs_diff(b.y);
-
-    let (a, b) = if steep {
-        (a.transpose(), b.transpose())
-    } else {
-        (a, b)
-    };
-
-    let (a, b) = if a.x > b.x { (b, a) } else { (a, b) };
-
-    let mut y = a.y;
-
-    let mut ierror = 0;
-    let aby = b.y.abs_diff(a.y);
-
-    for x in a.x..=b.x {
-        let coord = if steep {
-            GridPosition { x: y, y: x }
-        } else {
-            GridPosition { x, y }
-        };
-        pixel_data[coord.to_idx(width)] = color;
-
-        ierror += 2 * aby;
-        if ierror > (b.x - a.x) {
-            y = if b.y > a.y { y + 1 } else { y - 1 };
-
-            ierror -= 2 * (b.x - a.x);
-        }
-    }
-}
-
 // images render upside down
 // compared to the reference implementation
 fn main() -> Result<(), Error> {
+    let matches = command!()
+        .arg(
+            Arg::new("obj")
+                .help("path to a .obj file to load")
+                .required(true)
+                .index(1),
+        )
+        .get_matches();
+
+    let obj_path = matches
+        .get_one::<String>("obj")
+        .ok_or_else(|| Error::msg("missing obj path"))?;
+    let _obj_src = fs::read_to_string(obj_path)?;
+
     let width: u16 = 64;
     let height: u16 = 64;
 
