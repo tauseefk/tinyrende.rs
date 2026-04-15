@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write, path::Path};
+use std::{char::UNICODE_VERSION, fs::File, io::Write, path::Path};
 
 use anyhow::Error;
 use rand::RngExt;
@@ -83,21 +83,25 @@ fn line(
 
     let (a, b) = if a.x > b.x { (b, a) } else { (a, b) };
 
-    let mut t = 0.;
+    let mut y = a.y;
 
-    let (ax, ay) = (a.x as f32, a.y as f32);
-    let (bx, by) = (b.x as f32, b.y as f32);
+    let mut ierror = 0;
+    let aby = b.y.abs_diff(a.y);
 
     for x in a.x..=b.x {
-        let coord = GridPosition {
-            x: (ax + (bx - ax) * t).round() as u16,
-            y: (ay + (by - ay) * t).round() as u16,
+        let coord = if steep {
+            GridPosition { x: y, y: x }
+        } else {
+            GridPosition { x, y }
         };
-        let coord = if steep { coord.transpose() } else { coord };
-
         pixel_data[coord.to_idx(width)] = color;
 
-        t = ((x as f32) - ax) / (bx - ax);
+        ierror += 2 * aby;
+        if ierror > (b.x - a.x) {
+            y = if b.y > a.y { y + 1 } else { y - 1 };
+
+            ierror -= 2 * (b.x - a.x);
+        }
     }
 }
 
