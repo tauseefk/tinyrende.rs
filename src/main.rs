@@ -58,8 +58,6 @@ const YELLOW: PixelBGRA = PixelBGRA {
     a: 255,
 };
 
-// images render upside down
-// compared to the reference implementation
 fn main() -> Result<(), Error> {
     let matches = command!()
         .arg(
@@ -102,6 +100,19 @@ fn main() -> Result<(), Error> {
             let a = &mesh.vertices[face.vertices[i]];
             let b = &mesh.vertices[face.vertices[(i + 1) % n]];
             line(project(a), project(b), &mut frame_buffer, width, WHITE);
+        }
+    }
+
+    // tgar hard-codes the TGA header's upper-left-origin bit, so viewers
+    // treat row 0 as the top of the image. Our projection keeps the mesh's
+    // +Y-up convention, so mirror the rows here to compensate for tgar.
+    let w = width as usize;
+    let h = height as usize;
+    for row in 0..h / 2 {
+        let top = row * w;
+        let bot = (h - 1 - row) * w;
+        for col in 0..w {
+            frame_buffer.swap(top + col, bot + col);
         }
     }
 
