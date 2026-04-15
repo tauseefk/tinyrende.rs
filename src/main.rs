@@ -1,6 +1,7 @@
 use std::{fs::File, io::Write, path::Path};
 
 use anyhow::Error;
+use rand::RngExt;
 use tgar::{BGRA, PixelBGRA};
 
 const BLACK: PixelBGRA = PixelBGRA {
@@ -84,16 +85,19 @@ fn line(
 
     let mut t = 0.;
 
+    let (ax, ay) = (a.x as f32, a.y as f32);
+    let (bx, by) = (b.x as f32, b.y as f32);
+
     for x in a.x..=b.x {
         let coord = GridPosition {
-            x: ((a.x as f32) + ((b.x as f32) - (a.x as f32)) * t).round() as u16,
-            y: ((a.y as f32) + ((b.y) as f32 - (a.y as f32)) * t).round() as u16,
+            x: (ax + (bx - ax) * t).round() as u16,
+            y: (ay + (by - ay) * t).round() as u16,
         };
         let coord = if steep { coord.transpose() } else { coord };
 
         pixel_data[coord.to_idx(width)] = color;
 
-        t = ((x as f32) - (a.x as f32)) / (b.x as f32 - a.x as f32);
+        t = ((x as f32) - ax) / (bx - ax);
     }
 }
 
@@ -104,18 +108,32 @@ fn main() -> Result<(), Error> {
     let height: u16 = 64;
 
     let mut frame_buffer = vec![BLACK; (width * height) as usize];
-    let a = GridPosition { x: 7, y: 7 };
-    let b = GridPosition { x: 12, y: 37 };
-    let c = GridPosition { x: 62, y: 53 };
 
-    line(a, b, &mut frame_buffer, width, BLUE);
-    line(c, b, &mut frame_buffer, width, GREEN);
-    line(c, a, &mut frame_buffer, width, YELLOW);
-    line(a, c, &mut frame_buffer, width, RED);
+    let mut rng = rand::rng();
 
-    frame_buffer[a.to_idx(width)] = WHITE;
-    frame_buffer[b.to_idx(width)] = WHITE;
-    frame_buffer[c.to_idx(width)] = WHITE;
+    for _ in 0..16_000_000 {
+        let a = GridPosition {
+            x: rng.random::<u16>() % width,
+            y: rng.random::<u16>() % height,
+        };
+        let b = GridPosition {
+            x: rng.random::<u16>() % width,
+            y: rng.random::<u16>() % height,
+        };
+
+        line(
+            a,
+            b,
+            &mut frame_buffer,
+            width,
+            PixelBGRA {
+                b: rng.random::<u8>(),
+                g: rng.random::<u8>(),
+                r: rng.random::<u8>(),
+                a: 255,
+            },
+        );
+    }
 
     let frame_buffer: BGRA = BGRA::new(width, height, &frame_buffer);
 
