@@ -1,0 +1,1 @@
+{"rustc":10088478398040096810,"features":"[]","declared_features":"[]","target":13842552351511168896,"profile":5347358027863023418,"path":14115385023616687356,"deps":[],"local":[{"CheckDepInfo":{"dep_info":"debug/.fingerprint/tgar-37f318d508720497/dep-lib-tgar","checksum":false}}],"rustflags":["-C","target-feature=-crt-static"],"config":8247474407144887393,"compile_kind":0}
