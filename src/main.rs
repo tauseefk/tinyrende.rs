@@ -14,6 +14,8 @@ use tgar::{BGRA, PixelBGRA};
 
 use crate::{grid_position::GridPosition, line::line, obj::Vertex};
 
+const IMAGE_SIZE: u16 = 512;
+
 const TRANSPARENT: PixelBGRA = PixelBGRA {
     b: 0,
     g: 0,
@@ -73,10 +75,10 @@ fn main() -> Result<(), Error> {
         .ok_or_else(|| Error::msg("missing obj path"))?;
     let mesh = obj::parse(BufReader::new(File::open(obj_path)?))?;
 
-    let width: u16 = 64;
-    let height: u16 = 64;
+    let width: u16 = IMAGE_SIZE;
+    let height: u16 = IMAGE_SIZE;
 
-    let mut frame_buffer = vec![TRANSPARENT; (width * height) as usize];
+    let mut frame_buffer = vec![TRANSPARENT; width as usize * height as usize];
 
     let (mut min_x, mut max_x) = (f32::INFINITY, f32::NEG_INFINITY);
     let (mut min_y, mut max_y) = (f32::INFINITY, f32::NEG_INFINITY);
