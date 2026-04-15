@@ -65,14 +65,14 @@ fn line(
     color: PixelBGRA,
 ) {
     let mut t = 0.;
-    while t < 1. {
+    for x in a.x..b.x {
         let coord = GridPosition {
             x: ((a.x as f32) + ((b.x as f32) - (a.x as f32)) * t).round() as u16,
             y: ((a.y as f32) + ((b.y) as f32 - (a.y as f32)) * t).round() as u16,
         };
         pixel_data[coord.to_idx(width)] = color;
 
-        t += 0.02;
+        t = ((x as f32) - (a.x as f32)) / (b.x as f32 - a.x as f32);
     }
 }
 
