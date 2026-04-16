@@ -10,9 +10,9 @@ pub fn line(
     color: PixelBGRA,
 ) {
     // steep slope
-    let steep = a.x.abs_diff(b.x) < a.y.abs_diff(b.y);
+    let is_steep_slope = a.x.abs_diff(b.x) < a.y.abs_diff(b.y);
 
-    let (a, b) = if steep {
+    let (a, b) = if is_steep_slope {
         (a.transpose(), b.transpose())
     } else {
         (a, b)
@@ -30,7 +30,7 @@ pub fn line(
 
     for x in a.x..=b.x {
         let y_u16 = y as u16;
-        let coord = if steep {
+        let coord = if is_steep_slope {
             GridPosition { x: y_u16, y: x }
         } else {
             GridPosition { x, y: y_u16 }
