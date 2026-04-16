@@ -41,7 +41,7 @@ pub fn triangle_filled(
         }
     }
 
-    triangle(a, b, c, pixel_data, width, BLACK);
+    // triangle(a, b, c, pixel_data, width, BLACK);
 }
 
 fn get_bounding_box(
