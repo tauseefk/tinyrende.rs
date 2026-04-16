@@ -1,6 +1,5 @@
 use tgar::PixelBGRA;
 
-use crate::BLACK;
 use crate::grid_position::GridPosition;
 use crate::renderer::line::line;
 
@@ -27,6 +26,9 @@ pub fn triangle_filled(
 ) {
     let bounding_box = get_bounding_box(a, b, c);
     let area = signed_triangle_area(a, b, c);
+    if area == 0. {
+        return;
+    }
 
     for y in bounding_box.0.y..bounding_box.1.y {
         for x in bounding_box.0.x..bounding_box.1.x {
@@ -36,7 +38,7 @@ pub fn triangle_filled(
             let gamma = signed_triangle_area(a, p, c) / area;
 
             if alpha > 0. && beta > 0. && gamma > 0. {
-                pixel_data[(y as usize) * width as usize + x as usize] = color;
+                pixel_data[p.to_idx(width)] = color;
             }
         }
     }

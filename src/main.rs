@@ -10,7 +10,7 @@ use tgar::{BGRA, PixelBGRA};
 
 use crate::grid_position::GridPosition;
 use crate::renderer::mesh::render_mesh;
-use crate::renderer::triangle::{triangle, triangle_filled};
+use crate::renderer::triangle::triangle_filled;
 
 const IMAGE_SIZE: u16 = 512;
 

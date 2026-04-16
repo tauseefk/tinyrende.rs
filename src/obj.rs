@@ -2,12 +2,7 @@ use std::io::BufRead;
 
 use anyhow::Error;
 
-#[derive(Debug, Clone, Copy)]
-pub struct Vertex {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
+use crate::grid_position::Vertex;
 
 #[derive(Debug, Clone)]
 pub struct Face {
