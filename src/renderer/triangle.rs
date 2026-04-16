@@ -3,6 +3,7 @@ use tgar::PixelBGRA;
 use crate::grid_position::GridPosition;
 use crate::renderer::line::line;
 
+#[allow(dead_code)]
 pub fn triangle(
     a: GridPosition,
     b: GridPosition,
@@ -30,16 +31,27 @@ pub fn triangle_filled(
         return;
     }
 
+    let az = a.z as f32;
+    let bz = b.z as f32;
+    let cz = c.z as f32;
+
     for y in bounding_box.0.y..bounding_box.1.y {
         for x in bounding_box.0.x..bounding_box.1.x {
-            let p = GridPosition { x, y };
+            let p = GridPosition { x, y, z: 1 };
             let alpha = signed_triangle_area(a, b, p) / area;
             let beta = signed_triangle_area(p, b, c) / area;
             let gamma = signed_triangle_area(a, p, c) / area;
 
-            if alpha > 0. && beta > 0. && gamma > 0. {
-                pixel_data[p.to_idx(width)] = color;
+            if alpha < 0. || beta < 0. || gamma < 0. {
+                continue;
             }
+            let z = alpha * az + beta * bz + gamma * cz;
+            pixel_data[p.to_idx(width)] = PixelBGRA {
+                b: color.b,
+                g: color.g,
+                r: color.r,
+                a: z as u8,
+            };
         }
     }
 
@@ -56,10 +68,12 @@ fn get_bounding_box(
             GridPosition {
                 x: acc.0.x.min(curr.x),
                 y: acc.0.y.min(curr.y),
+                z: acc.0.z.min(curr.z),
             },
             GridPosition {
                 x: acc.1.x.max(curr.x),
                 y: acc.1.y.max(curr.y),
+                z: acc.0.z.max(curr.z),
             },
         )
     })

@@ -2,6 +2,7 @@
 pub struct GridPosition {
     pub x: u16,
     pub y: u16,
+    pub z: u16,
 }
 
 impl GridPosition {
@@ -10,10 +11,11 @@ impl GridPosition {
     }
 
     #[allow(dead_code)]
-    pub fn transpose(&self) -> GridPosition {
+    pub fn transpose_xy(&self) -> GridPosition {
         GridPosition {
             x: self.y,
             y: self.x,
+            z: self.z,
         }
     }
 }
@@ -22,7 +24,6 @@ impl GridPosition {
 pub struct Vertex {
     pub x: f32,
     pub y: f32,
-    #[allow(dead_code)]
     pub z: f32,
 }
 
@@ -31,6 +32,7 @@ impl Vertex {
         GridPosition {
             x: ((self.x + 1.0) * (width / 2) as f32) as u16,
             y: ((self.y + 1.0) * (height / 2) as f32) as u16,
+            z: self.z as u16,
         }
     }
 }

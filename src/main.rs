@@ -87,9 +87,21 @@ fn main() -> Result<(), Error> {
             render_mesh(Path::new(path), &mut frame_buffer, width, height)?;
         }
         Some(("triangle", _)) => {
-            let a = GridPosition { x: 100, y: 50 };
-            let b = GridPosition { x: 400, y: 450 };
-            let c = GridPosition { x: 50, y: 350 };
+            let a = GridPosition {
+                x: 100,
+                y: 50,
+                z: 13,
+            };
+            let b = GridPosition {
+                x: 400,
+                y: 450,
+                z: 128,
+            };
+            let c = GridPosition {
+                x: 50,
+                y: 350,
+                z: 255,
+            };
             triangle_filled(a, b, c, &mut frame_buffer, width, YELLOW);
         }
         _ => unreachable!(),
