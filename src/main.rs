@@ -10,7 +10,7 @@ use tgar::{BGRA, PixelBGRA};
 
 use crate::grid_position::GridPosition;
 use crate::renderer::mesh::render_mesh;
-use crate::renderer::triangle::triangle;
+use crate::renderer::triangle::{triangle, triangle_filled};
 
 const IMAGE_SIZE: u16 = 512;
 
@@ -83,7 +83,7 @@ fn main() -> Result<(), Error> {
             let a = GridPosition { x: 100, y: 50 };
             let b = GridPosition { x: 400, y: 450 };
             let c = GridPosition { x: 50, y: 350 };
-            triangle(a, b, c, &mut frame_buffer, width, WHITE);
+            triangle_filled(a, b, c, &mut frame_buffer, width, YELLOW);
         }
         _ => unreachable!(),
     }
