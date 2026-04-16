@@ -5,10 +5,12 @@ mod renderer;
 use std::{fs::File, io::Write, path::Path};
 
 use anyhow::Error;
-use clap::{Arg, command};
+use clap::{Arg, Command, command};
 use tgar::{BGRA, PixelBGRA};
 
+use crate::grid_position::GridPosition;
 use crate::renderer::mesh::render_mesh;
+use crate::renderer::triangle::triangle;
 
 const IMAGE_SIZE: u16 = 512;
 
@@ -56,24 +58,35 @@ const YELLOW: PixelBGRA = PixelBGRA {
 
 fn main() -> Result<(), Error> {
     let matches = command!()
-        .arg(
-            Arg::new("obj")
-                .help("path to a .obj file to load")
-                .required(true)
-                .index(1),
+        .subcommand_required(true)
+        .subcommand(
+            Command::new("mesh")
+                .about("render wireframe mesh")
+                .arg(Arg::new("path").required(true).index(1)),
         )
+        .subcommand(Command::new("triangle").about("render filled triangle"))
         .get_matches();
-
-    let obj_path = matches
-        .get_one::<String>("obj")
-        .ok_or_else(|| Error::msg("missing obj path"))?;
 
     let width: u16 = IMAGE_SIZE;
     let height: u16 = IMAGE_SIZE;
 
     let mut frame_buffer = vec![TRANSPARENT; width as usize * height as usize];
 
-    render_mesh(Path::new(obj_path), &mut frame_buffer, width, height)?;
+    match matches.subcommand() {
+        Some(("mesh", sub)) => {
+            let path = sub
+                .get_one::<String>("path")
+                .ok_or_else(|| Error::msg("missing path"))?;
+            render_mesh(Path::new(path), &mut frame_buffer, width, height)?;
+        }
+        Some(("triangle", _)) => {
+            let a = GridPosition { x: 100, y: 50 };
+            let b = GridPosition { x: 400, y: 450 };
+            let c = GridPosition { x: 50, y: 350 };
+            triangle(a, b, c, &mut frame_buffer, width, WHITE);
+        }
+        _ => unreachable!(),
+    }
 
     // tgar hard-codes the TGA header's upper-left-origin bit, so viewers
     // treat row 0 as the top of the image. Our projection keeps the mesh's
