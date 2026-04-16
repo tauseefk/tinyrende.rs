@@ -21,6 +21,13 @@ const TRANSPARENT: PixelBGRA = PixelBGRA {
     a: 0,
 };
 
+const BLACK: PixelBGRA = PixelBGRA {
+    b: 0,
+    g: 0,
+    r: 0,
+    a: 255,
+};
+
 const WHITE: PixelBGRA = PixelBGRA {
     b: 255,
     g: 255,

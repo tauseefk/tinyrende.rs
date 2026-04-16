@@ -1,6 +1,6 @@
 use tgar::PixelBGRA;
 
-use crate::BLUE;
+use crate::BLACK;
 use crate::grid_position::GridPosition;
 use crate::renderer::line::line;
 
@@ -26,24 +26,25 @@ pub fn triangle_filled(
     color: PixelBGRA,
 ) {
     let bounding_box = get_bounding_box(a, b, c);
+    let area = signed_triangle_area(a, b, c);
 
     for y in bounding_box.0.y..bounding_box.1.y {
         for x in bounding_box.0.x..bounding_box.1.x {
-            line(
-                GridPosition { x, y },
-                GridPosition { x: x + 1, y },
-                pixel_data,
-                width,
-                color,
-            );
+            let p = GridPosition { x, y };
+            let alpha = signed_triangle_area(a, b, p) / area;
+            let beta = signed_triangle_area(p, b, c) / area;
+            let gamma = signed_triangle_area(a, p, c) / area;
+
+            if alpha > 0. && beta > 0. && gamma > 0. {
+                pixel_data[(y as usize) * width as usize + x as usize] = color;
+            }
         }
     }
-    line(a, b, pixel_data, width, BLUE);
-    line(b, c, pixel_data, width, BLUE);
-    line(a, c, pixel_data, width, BLUE);
+
+    triangle(a, b, c, pixel_data, width, BLACK);
 }
 
-pub fn get_bounding_box(
+fn get_bounding_box(
     a: GridPosition,
     b: GridPosition,
     c: GridPosition,
@@ -60,4 +61,15 @@ pub fn get_bounding_box(
             },
         )
     })
+}
+
+fn signed_triangle_area(a: GridPosition, b: GridPosition, c: GridPosition) -> f32 {
+    let ax = a.x as f32;
+    let ay = a.y as f32;
+    let bx = b.x as f32;
+    let by = b.y as f32;
+    let cx = c.x as f32;
+    let cy = c.y as f32;
+
+    0.5 * ((by - ay) * (bx + ax) + (cy - by) * (cx + bx) + (ay - cy) * (ax + cx))
 }
