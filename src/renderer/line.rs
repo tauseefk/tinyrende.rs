@@ -1,6 +1,6 @@
 use tgar::PixelBGRA;
 
-use crate::grid_position::GridPosition;
+use crate::batteries::GridPosition;
 
 pub fn line(
     a: GridPosition,

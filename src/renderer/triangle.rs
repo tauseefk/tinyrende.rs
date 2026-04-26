@@ -1,6 +1,6 @@
 use tgar::PixelBGRA;
 
-use crate::grid_position::{GridPosition, Vertex};
+use crate::batteries::{FloatColor, GridPosition, Vertex};
 use crate::renderer::line::line;
 
 #[allow(dead_code)]
@@ -21,6 +21,9 @@ pub fn triangle_filled(a: Vertex, b: Vertex, c: Vertex, pixel_data: &mut [PixelB
     let a_pos = a.position;
     let b_pos = b.position;
     let c_pos = c.position;
+    let a_color: FloatColor = a.color.into();
+    let b_color: FloatColor = b.color.into();
+    let c_color: FloatColor = c.color.into();
 
     let bounding_box = get_bounding_box(a_pos, b_pos, c_pos);
     let area = signed_triangle_area(a_pos, b_pos, c_pos);
@@ -44,18 +47,13 @@ pub fn triangle_filled(a: Vertex, b: Vertex, c: Vertex, pixel_data: &mut [PixelB
             }
             let z = alpha * az + beta * bz + gamma * cz;
             pixel_data[p.to_idx(width)] = PixelBGRA {
-                b: (a.color.b as f32 * alpha + b.color.b as f32 * beta + c.color.b as f32 * gamma)
-                    as u8,
-                g: (a.color.g as f32 * alpha + b.color.g as f32 * beta + c.color.g as f32 * gamma)
-                    as u8,
-                r: (a.color.r as f32 * alpha + b.color.r as f32 * beta + c.color.r as f32 * gamma)
-                    as u8,
+                b: (a_color.b * alpha + b_color.b * beta + c_color.b * gamma) as u8,
+                g: (a_color.g * alpha + b_color.g * beta + c_color.g * gamma) as u8,
+                r: (a_color.r * alpha + b_color.r * beta + c_color.r * gamma) as u8,
                 a: z as u8,
             };
         }
     }
-
-    // triangle(a, b, c, pixel_data, width, BLACK);
 }
 
 fn get_bounding_box(

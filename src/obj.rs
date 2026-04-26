@@ -2,7 +2,7 @@ use std::io::BufRead;
 
 use anyhow::Error;
 
-use crate::grid_position::Translation;
+use crate::batteries::Translation;
 
 #[derive(Debug, Clone)]
 pub struct Face {

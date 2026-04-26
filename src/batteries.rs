@@ -29,6 +29,26 @@ pub struct Vertex {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct FloatColor {
+    pub b: f32,
+    pub r: f32,
+    pub g: f32,
+    #[allow(dead_code)]
+    pub a: f32,
+}
+
+impl From<PixelBGRA> for FloatColor {
+    fn from(color: PixelBGRA) -> Self {
+        FloatColor {
+            b: color.b as f32,
+            r: color.r as f32,
+            g: color.g as f32,
+            a: color.a as f32,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Translation {
     pub x: f32,
     pub y: f32,

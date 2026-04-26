@@ -1,4 +1,4 @@
-mod grid_position;
+mod batteries;
 mod obj;
 mod renderer;
 
@@ -8,7 +8,7 @@ use anyhow::Error;
 use clap::{Arg, Command, command};
 use tgar::{BGRA, PixelBGRA};
 
-use crate::grid_position::{GridPosition, Vertex};
+use crate::batteries::{GridPosition, Vertex};
 use crate::renderer::mesh::render_mesh;
 use crate::renderer::triangle::triangle_filled;
 
@@ -21,6 +21,7 @@ const TRANSPARENT: PixelBGRA = PixelBGRA {
     a: 0,
 };
 
+#[allow(dead_code)]
 const BLACK: PixelBGRA = PixelBGRA {
     b: 0,
     g: 0,
@@ -28,6 +29,7 @@ const BLACK: PixelBGRA = PixelBGRA {
     a: 255,
 };
 
+#[allow(dead_code)]
 const WHITE: PixelBGRA = PixelBGRA {
     b: 255,
     g: 255,
@@ -56,6 +58,7 @@ const BLUE: PixelBGRA = PixelBGRA {
     a: 255,
 };
 
+#[allow(dead_code)]
 const YELLOW: PixelBGRA = PixelBGRA {
     b: 0,
     g: 200,

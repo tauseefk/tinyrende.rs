@@ -3,7 +3,7 @@ use std::{fs::File, io::BufReader, path::Path};
 use anyhow::Error;
 use tgar::PixelBGRA;
 
-use crate::grid_position::Vertex;
+use crate::batteries::Vertex;
 use crate::renderer::triangle::triangle_filled;
 use crate::{BLUE, GREEN, RED, obj};
 
@@ -23,13 +23,6 @@ pub fn render_mesh(
         let a = a.project(width, height);
         let b = b.project(width, height);
         let c = c.project(width, height);
-
-        let color = PixelBGRA {
-            b: rand::random(),
-            g: rand::random(),
-            r: rand::random(),
-            a: 255,
-        };
 
         triangle_filled(
             Vertex {
