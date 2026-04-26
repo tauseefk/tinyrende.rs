@@ -1,4 +1,6 @@
-#[derive(Copy, Clone)]
+use tgar::PixelBGRA;
+
+#[derive(Debug, Clone, Copy)]
 pub struct GridPosition {
     pub x: u16,
     pub y: u16,
@@ -22,12 +24,18 @@ impl GridPosition {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vertex {
+    pub position: GridPosition,
+    pub color: PixelBGRA,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Translation {
     pub x: f32,
     pub y: f32,
     pub z: f32,
 }
 
-impl Vertex {
+impl Translation {
     pub fn project(&self, width: u16, height: u16) -> GridPosition {
         GridPosition {
             x: ((self.x + 1.0) * (width / 2) as f32) as u16,

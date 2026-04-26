@@ -1,55 +1,55 @@
 use tgar::PixelBGRA;
 
-use crate::grid_position::GridPosition;
+use crate::grid_position::{GridPosition, Vertex};
 use crate::renderer::line::line;
 
 #[allow(dead_code)]
 pub fn triangle(
-    a: GridPosition,
-    b: GridPosition,
-    c: GridPosition,
+    a: Vertex,
+    b: Vertex,
+    c: Vertex,
     pixel_data: &mut [PixelBGRA],
     width: u16,
     color: PixelBGRA,
 ) {
-    line(a, b, pixel_data, width, color);
-    line(b, c, pixel_data, width, color);
-    line(c, a, pixel_data, width, color);
+    line(a.position, b.position, pixel_data, width, color);
+    line(b.position, c.position, pixel_data, width, color);
+    line(c.position, a.position, pixel_data, width, color);
 }
 
-pub fn triangle_filled(
-    a: GridPosition,
-    b: GridPosition,
-    c: GridPosition,
-    pixel_data: &mut [PixelBGRA],
-    width: u16,
-    color: PixelBGRA,
-) {
-    let bounding_box = get_bounding_box(a, b, c);
-    let area = signed_triangle_area(a, b, c);
+pub fn triangle_filled(a: Vertex, b: Vertex, c: Vertex, pixel_data: &mut [PixelBGRA], width: u16) {
+    let a_pos = a.position;
+    let b_pos = b.position;
+    let c_pos = c.position;
+
+    let bounding_box = get_bounding_box(a_pos, b_pos, c_pos);
+    let area = signed_triangle_area(a_pos, b_pos, c_pos);
     if area == 0. {
         return;
     }
 
-    let az = a.z as f32;
-    let bz = b.z as f32;
-    let cz = c.z as f32;
+    let az = a_pos.z as f32;
+    let bz = b_pos.z as f32;
+    let cz = c_pos.z as f32;
 
     for y in bounding_box.0.y..bounding_box.1.y {
         for x in bounding_box.0.x..bounding_box.1.x {
             let p = GridPosition { x, y, z: 1 };
-            let alpha = signed_triangle_area(a, b, p) / area;
-            let beta = signed_triangle_area(p, b, c) / area;
-            let gamma = signed_triangle_area(a, p, c) / area;
+            let alpha = signed_triangle_area(a_pos, b_pos, p) / area;
+            let beta = signed_triangle_area(p, b_pos, c_pos) / area;
+            let gamma = signed_triangle_area(a_pos, p, c_pos) / area;
 
             if alpha < 0. || beta < 0. || gamma < 0. {
                 continue;
             }
             let z = alpha * az + beta * bz + gamma * cz;
             pixel_data[p.to_idx(width)] = PixelBGRA {
-                b: color.b,
-                g: color.g,
-                r: color.r,
+                b: (a.color.b as f32 * alpha + b.color.b as f32 * beta + c.color.b as f32 * gamma)
+                    as u8,
+                g: (a.color.g as f32 * alpha + b.color.g as f32 * beta + c.color.g as f32 * gamma)
+                    as u8,
+                r: (a.color.r as f32 * alpha + b.color.r as f32 * beta + c.color.r as f32 * gamma)
+                    as u8,
                 a: z as u8,
             };
         }

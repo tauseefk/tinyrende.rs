@@ -8,7 +8,7 @@ use anyhow::Error;
 use clap::{Arg, Command, command};
 use tgar::{BGRA, PixelBGRA};
 
-use crate::grid_position::GridPosition;
+use crate::grid_position::{GridPosition, Vertex};
 use crate::renderer::mesh::render_mesh;
 use crate::renderer::triangle::triangle_filled;
 
@@ -87,22 +87,31 @@ fn main() -> Result<(), Error> {
             render_mesh(Path::new(path), &mut frame_buffer, width, height)?;
         }
         Some(("triangle", _)) => {
-            let a = GridPosition {
-                x: 100,
-                y: 50,
-                z: 13,
+            let a = Vertex {
+                position: GridPosition {
+                    x: 100,
+                    y: 50,
+                    z: 13,
+                },
+                color: RED,
             };
-            let b = GridPosition {
-                x: 400,
-                y: 450,
-                z: 128,
+            let b = Vertex {
+                position: GridPosition {
+                    x: 400,
+                    y: 450,
+                    z: 128,
+                },
+                color: GREEN,
             };
-            let c = GridPosition {
-                x: 50,
-                y: 350,
-                z: 255,
+            let c = Vertex {
+                position: GridPosition {
+                    x: 50,
+                    y: 350,
+                    z: 255,
+                },
+                color: BLUE,
             };
-            triangle_filled(a, b, c, &mut frame_buffer, width, YELLOW);
+            triangle_filled(a, b, c, &mut frame_buffer, width);
         }
         _ => unreachable!(),
     }

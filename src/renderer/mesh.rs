@@ -3,8 +3,9 @@ use std::{fs::File, io::BufReader, path::Path};
 use anyhow::Error;
 use tgar::PixelBGRA;
 
-use crate::obj;
+use crate::grid_position::Vertex;
 use crate::renderer::triangle::triangle_filled;
+use crate::{BLUE, GREEN, RED, obj};
 
 pub fn render_mesh(
     path: &Path,
@@ -30,7 +31,22 @@ pub fn render_mesh(
             a: 255,
         };
 
-        triangle_filled(a, b, c, frame_buffer, width, color);
+        triangle_filled(
+            Vertex {
+                position: a,
+                color: RED,
+            },
+            Vertex {
+                position: b,
+                color: GREEN,
+            },
+            Vertex {
+                position: c,
+                color: BLUE,
+            },
+            frame_buffer,
+            width,
+        );
     }
 
     Ok(())

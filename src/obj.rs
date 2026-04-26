@@ -2,7 +2,7 @@ use std::io::BufRead;
 
 use anyhow::Error;
 
-use crate::grid_position::Vertex;
+use crate::grid_position::Translation;
 
 #[derive(Debug, Clone)]
 pub struct Face {
@@ -11,7 +11,7 @@ pub struct Face {
 
 #[derive(Debug, Default)]
 pub struct Mesh {
-    pub vertices: Vec<Vertex>,
+    pub vertices: Vec<Translation>,
     pub faces: Vec<Face>,
 }
 
@@ -40,7 +40,7 @@ pub fn parse(mut reader: impl BufRead) -> Result<Mesh, Error> {
                     .next()
                     .ok_or_else(|| Error::msg("v: missing z"))?
                     .parse()?;
-                mesh.vertices.push(Vertex { x, y, z });
+                mesh.vertices.push(Translation { x, y, z });
             }
             Some("f") => {
                 let mut indices = Vec::new();
