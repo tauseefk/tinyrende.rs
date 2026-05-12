@@ -49,6 +49,7 @@ impl From<PixelBGRA> for FloatColor {
 }
 
 #[derive(Debug, Clone, Copy)]
+// TODO: rename this
 pub struct Translation {
     pub x: f32,
     pub y: f32,
@@ -56,6 +57,16 @@ pub struct Translation {
 }
 
 impl Translation {
+    pub fn rot_xz(&self, angle: f32) -> Translation {
+        let c = angle.cos();
+        let s = angle.sin();
+        Translation {
+            x: self.x * c - self.y * s,
+            y: self.x * s + self.y * c,
+            z: self.z,
+        }
+    }
+
     pub fn project(&self, width: u16, height: u16) -> GridPosition {
         GridPosition {
             x: ((self.x + 1.0) * (width / 2) as f32) as u16,
