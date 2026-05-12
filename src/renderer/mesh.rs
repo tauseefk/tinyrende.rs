@@ -10,7 +10,7 @@ use crate::{BLUE, GREEN, RED, obj};
 pub fn render_mesh(
     path: &Path,
     frame_buffer: &mut [PixelBGRA],
-    depth_buffer: &mut [PixelBGRA],
+    depth_buffer: &mut [u8],
     width: u16,
     height: u16,
 ) -> Result<(), Error> {

@@ -81,7 +81,7 @@ fn main() -> Result<(), Error> {
     let height: u16 = IMAGE_SIZE;
 
     let mut frame_buffer = vec![TRANSPARENT; width as usize * height as usize];
-    let mut z_buffer = vec![TRANSPARENT; width as usize * height as usize];
+    let mut z_buffer = vec![0_u8; width as usize * height as usize];
 
     match matches.subcommand() {
         Some(("mesh", sub)) => {
@@ -136,7 +136,6 @@ fn main() -> Result<(), Error> {
         let bot = (h - 1 - row) * w;
         for col in 0..w {
             frame_buffer.swap(top + col, bot + col);
-            z_buffer.swap(top + col, bot + col);
         }
     }
 
@@ -144,11 +143,6 @@ fn main() -> Result<(), Error> {
 
     let mut file = File::create(Path::new("framebuffer.tga"))?;
     file.write_all(&frame_buffer.into_data())?;
-
-    let z_buffer: BGRA = BGRA::new(width, height, &z_buffer);
-
-    let mut file = File::create(Path::new("depthbuffer.tga"))?;
-    file.write_all(&z_buffer.into_data())?;
 
     Ok(())
 }

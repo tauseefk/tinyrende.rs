@@ -22,7 +22,7 @@ pub fn triangle_filled(
     b: Vertex,
     c: Vertex,
     pixel_data: &mut [PixelBGRA],
-    depth_data: &mut [PixelBGRA],
+    depth_data: &mut [u8],
     width: u16,
 ) {
     let a_pos = a.position;
@@ -57,13 +57,8 @@ pub fn triangle_filled(
             let pixel_idx = p.to_idx(width);
             let existing_z = depth_data[pixel_idx];
 
-            if z > (existing_z.a as f32) {
-                depth_data[pixel_idx] = PixelBGRA {
-                    a: (z as u8).max(depth_data[pixel_idx].a),
-                    b: 255,
-                    g: 255,
-                    r: 255,
-                };
+            if z > (existing_z as f32) {
+                depth_data[pixel_idx] = (z as u8).max(depth_data[pixel_idx]);
 
                 pixel_data[pixel_idx] = PixelBGRA {
                     b: (a_color.b * alpha + b_color.b * beta + c_color.b * gamma) as u8,
