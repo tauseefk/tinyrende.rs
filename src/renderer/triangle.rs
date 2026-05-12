@@ -24,6 +24,7 @@ pub fn triangle_filled(
     pixel_data: &mut [PixelBGRA],
     depth_data: &mut [u8],
     width: u16,
+    height: u16,
 ) {
     let a_pos = a.position;
     let b_pos = b.position;
@@ -42,8 +43,13 @@ pub fn triangle_filled(
     let bz = b_pos.z as f32;
     let cz = c_pos.z as f32;
 
-    for y in bounding_box.0.y..bounding_box.1.y {
-        for x in bounding_box.0.x..bounding_box.1.x {
+    let min_x = bounding_box.0.x.min(width);
+    let max_x = bounding_box.1.x.min(width);
+    let min_y = bounding_box.0.y.min(height);
+    let max_y = bounding_box.1.y.min(height);
+
+    for y in min_y..max_y {
+        for x in min_x..max_x {
             let p = GridPosition { x, y, z: 1 };
 
             let alpha = signed_triangle_area(a_pos, b_pos, p) / area;

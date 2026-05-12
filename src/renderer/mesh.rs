@@ -44,6 +44,7 @@ pub fn render_mesh(
             frame_buffer,
             depth_buffer,
             width,
+            height,
         );
     }
 

@@ -121,7 +121,7 @@ fn main() -> Result<(), Error> {
                 },
                 color: BLUE,
             };
-            triangle_filled(a, b, c, &mut frame_buffer, &mut z_buffer, width);
+            triangle_filled(a, b, c, &mut frame_buffer, &mut z_buffer, width, height);
         }
         _ => unreachable!(),
     }
