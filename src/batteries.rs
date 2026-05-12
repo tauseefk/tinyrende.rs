@@ -1,4 +1,15 @@
+use rand::RngExt;
 use tgar::PixelBGRA;
+
+pub fn random_color() -> PixelBGRA {
+    let mut rng = rand::rng();
+    PixelBGRA {
+        b: rng.random(),
+        g: rng.random(),
+        r: rng.random(),
+        a: 255,
+    }
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct GridPosition {
@@ -37,33 +48,40 @@ impl From<PixelBGRA> for FloatColor {
 }
 
 #[derive(Debug, Clone, Copy)]
-// TODO: rename this
-pub struct Translation {
+pub struct Transform {
     pub x: f32,
     pub y: f32,
     pub z: f32,
 }
 
-impl Translation {
-    pub fn rot_xz(&self, angle: f32) -> Translation {
+impl Transform {
+    pub fn translate(&self, by: Transform) -> Transform {
+        Transform {
+            x: self.x + by.x,
+            y: self.y + by.y,
+            z: self.z + by.z,
+        }
+    }
+
+    pub fn rot_xz(&self, angle: f32) -> Transform {
         let c = angle.cos();
         let s = angle.sin();
-        Translation {
+        Transform {
             x: self.x * c - self.z * s,
             y: self.y,
             z: self.x * s + self.z * c,
         }
     }
 
-    pub fn div(&self, rhs: f32) -> Translation {
-        Translation {
+    pub fn div(&self, rhs: f32) -> Transform {
+        Transform {
             x: self.x / rhs,
             y: self.y / rhs,
             z: self.z / rhs,
         }
     }
 
-    pub fn persp(&self) -> Translation {
+    pub fn persp(&self) -> Transform {
         let c: f32 = 3.0;
 
         self.div(1.0 - self.z / c)

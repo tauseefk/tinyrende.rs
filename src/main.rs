@@ -2,17 +2,25 @@ mod batteries;
 mod obj;
 mod renderer;
 
+use std::f32::consts::PI;
 use std::{fs::File, io::Write, path::Path};
 
 use anyhow::Error;
 use clap::{Arg, Command, command};
 use tgar::{BGRA, PixelBGRA};
 
-use crate::batteries::{GridPosition, Vertex};
+use crate::batteries::{GridPosition, Transform, Vertex};
 use crate::renderer::mesh::render_mesh;
 use crate::renderer::triangle::triangle_filled;
 
 const IMAGE_SIZE: u16 = 512;
+
+const ROTATION_ANGLE: f32 = -30.0 * PI / 180.0;
+const TRANSLATION: Transform = Transform {
+    x: 0.2,
+    y: 0.0,
+    z: -0.5,
+};
 
 const TRANSPARENT: PixelBGRA = PixelBGRA {
     b: 0,
