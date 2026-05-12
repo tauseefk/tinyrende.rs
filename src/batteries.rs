@@ -61,9 +61,9 @@ impl Translation {
         let c = angle.cos();
         let s = angle.sin();
         Translation {
-            x: self.x * c - self.y * s,
-            y: self.x * s + self.y * c,
-            z: self.z,
+            x: self.x * c - self.z * s,
+            y: self.y,
+            z: self.x * s + self.z * c,
         }
     }
 

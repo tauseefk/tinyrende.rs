@@ -8,7 +8,7 @@ use crate::batteries::Vertex;
 use crate::renderer::triangle::triangle_filled;
 use crate::{BLUE, GREEN, RED, obj};
 
-const THIRTY_DEGREES: f32 = PI / 6.0;
+const THIRTY_DEGREES: f32 = -PI / 6.0;
 
 pub fn render_mesh(
     path: &Path,
