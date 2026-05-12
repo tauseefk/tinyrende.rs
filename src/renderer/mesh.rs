@@ -24,9 +24,9 @@ pub fn render_mesh(
         let b = &mesh.vertices[face.vertices[1]];
         let c = &mesh.vertices[face.vertices[2]];
 
-        let a = a.rot_xz(THIRTY_DEGREES).project(width, height);
-        let b = b.rot_xz(THIRTY_DEGREES).project(width, height);
-        let c = c.rot_xz(THIRTY_DEGREES).project(width, height);
+        let a = a.rot_xz(THIRTY_DEGREES).persp().project(width, height);
+        let b = b.rot_xz(THIRTY_DEGREES).persp().project(width, height);
+        let c = c.rot_xz(THIRTY_DEGREES).persp().project(width, height);
 
         triangle_filled(
             Vertex {

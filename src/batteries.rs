@@ -67,6 +67,20 @@ impl Translation {
         }
     }
 
+    pub fn div(&self, rhs: f32) -> Translation {
+        Translation {
+            x: self.x / rhs,
+            y: self.y / rhs,
+            z: self.z / rhs,
+        }
+    }
+
+    pub fn persp(&self) -> Translation {
+        let c: f32 = 3.0;
+
+        self.div(1.0 - self.z / c)
+    }
+
     pub fn project(&self, width: u16, height: u16) -> GridPosition {
         GridPosition {
             x: ((self.x + 1.0) * (width / 2) as f32) as u16,
