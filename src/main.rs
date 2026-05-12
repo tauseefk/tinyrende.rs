@@ -1,26 +1,19 @@
 mod batteries;
+mod mat4x4;
 mod obj;
 mod renderer;
 
-use std::f32::consts::PI;
 use std::{fs::File, io::Write, path::Path};
 
 use anyhow::Error;
 use clap::{Arg, Command, command};
 use tgar::{BGRA, PixelBGRA};
 
-use crate::batteries::{GridPosition, Transform, Vertex};
+use crate::batteries::{GridPosition, Vertex};
 use crate::renderer::mesh::render_mesh;
 use crate::renderer::triangle::triangle_filled;
 
 const IMAGE_SIZE: u16 = 512;
-
-const ROTATION_ANGLE: f32 = -30.0 * PI / 180.0;
-const TRANSLATION: Transform = Transform {
-    x: 0.2,
-    y: 0.0,
-    z: -0.5,
-};
 
 const TRANSPARENT: PixelBGRA = PixelBGRA {
     b: 0,
@@ -89,13 +82,15 @@ fn main() -> Result<(), Error> {
     let height: u16 = IMAGE_SIZE;
 
     let mut frame_buffer = vec![TRANSPARENT; width as usize * height as usize];
-    let mut z_buffer = vec![0_u8; width as usize * height as usize];
 
     match matches.subcommand() {
         Some(("mesh", sub)) => {
             let path = sub
                 .get_one::<String>("path")
                 .ok_or_else(|| Error::msg("missing path"))?;
+            // The mesh rasterizer interpolates NDC z (in [-1, 1]) as f32 and
+            // mirrors the tinyrenderer reference's `-DBL_MAX` initial value.
+            let mut z_buffer = vec![f32::NEG_INFINITY; width as usize * height as usize];
             render_mesh(
                 Path::new(path),
                 &mut frame_buffer,
@@ -105,6 +100,7 @@ fn main() -> Result<(), Error> {
             )?;
         }
         Some(("triangle", _)) => {
+            let mut z_buffer = vec![0_u8; width as usize * height as usize];
             let a = Vertex {
                 position: GridPosition {
                     x: 100,

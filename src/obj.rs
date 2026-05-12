@@ -2,7 +2,7 @@ use std::io::BufRead;
 
 use anyhow::Error;
 
-use crate::batteries::Transform;
+use crate::batteries::Vec3;
 
 #[derive(Debug, Clone)]
 pub struct Face {
@@ -11,7 +11,7 @@ pub struct Face {
 
 #[derive(Debug, Default)]
 pub struct Mesh {
-    pub vertices: Vec<Transform>,
+    pub vertices: Vec<Vec3>,
     pub faces: Vec<Face>,
 }
 
@@ -40,7 +40,7 @@ pub fn parse(mut reader: impl BufRead) -> Result<Mesh, Error> {
                     .next()
                     .ok_or_else(|| Error::msg("v: missing z"))?
                     .parse()?;
-                mesh.vertices.push(Transform { x, y, z });
+                mesh.vertices.push(Vec3 { x, y, z });
             }
             Some("f") => {
                 let mut indices = Vec::new();

@@ -1,3 +1,5 @@
+use std::ops::Sub;
+
 use rand::RngExt;
 use tgar::PixelBGRA;
 
@@ -48,50 +50,50 @@ impl From<PixelBGRA> for FloatColor {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Transform {
+pub struct Vec3 {
     pub x: f32,
     pub y: f32,
     pub z: f32,
 }
 
-impl Transform {
-    pub fn translate(&self, by: Transform) -> Transform {
-        Transform {
-            x: self.x + by.x,
-            y: self.y + by.y,
-            z: self.z + by.z,
+impl Vec3 {
+    pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
+        Vec3 { x, y, z }
+    }
+
+    /// Returns the length (also called norm) of the vector.
+    pub fn length(&self) -> f32 {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+
+    pub fn normalized(&self) -> Vec3 {
+        let length = self.length();
+        debug_assert!(length > 0.0, "cannot normalize zero vector");
+
+        Vec3 {
+            x: self.x / length,
+            y: self.y / length,
+            z: self.z / length,
         }
     }
 
-    pub fn rot_xz(&self, angle: f32) -> Transform {
-        let c = angle.cos();
-        let s = angle.sin();
-        Transform {
-            x: self.x * c - self.z * s,
-            y: self.y,
-            z: self.x * s + self.z * c,
+    pub fn cross(&self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.y * rhs.z - self.z * rhs.y,
+            y: self.z * rhs.x - self.x * rhs.z,
+            z: self.x * rhs.y - self.y * rhs.x,
         }
     }
+}
 
-    pub fn div(&self, rhs: f32) -> Transform {
-        Transform {
-            x: self.x / rhs,
-            y: self.y / rhs,
-            z: self.z / rhs,
-        }
-    }
+impl Sub for Vec3 {
+    type Output = Vec3;
 
-    pub fn persp(&self) -> Transform {
-        let c: f32 = 3.0;
-
-        self.div(1.0 - self.z / c)
-    }
-
-    pub fn project(&self, width: u16, height: u16) -> GridPosition {
-        GridPosition {
-            x: ((self.x + 1.0) * (width / 2) as f32) as u16,
-            y: ((self.y + 1.0) * (height / 2) as f32) as u16,
-            z: ((self.z + 1.0) * 255. / 2.) as u16,
+    fn sub(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
         }
     }
 }
