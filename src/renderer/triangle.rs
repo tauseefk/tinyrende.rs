@@ -1,21 +1,6 @@
 use tgar::PixelBGRA;
 
 use crate::batteries::{FloatColor, GridPosition, Vertex};
-use crate::renderer::line::line;
-
-#[allow(dead_code)]
-pub fn triangle(
-    a: Vertex,
-    b: Vertex,
-    c: Vertex,
-    pixel_data: &mut [PixelBGRA],
-    width: u16,
-    color: PixelBGRA,
-) {
-    line(a.position, b.position, pixel_data, width, color);
-    line(b.position, c.position, pixel_data, width, color);
-    line(c.position, a.position, pixel_data, width, color);
-}
 
 pub fn triangle_filled(
     a: Vertex,

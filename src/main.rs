@@ -37,6 +37,14 @@ const WHITE: PixelBGRA = PixelBGRA {
     a: 255,
 };
 
+#[allow(dead_code)]
+const YELLOW: PixelBGRA = PixelBGRA {
+    b: 0,
+    g: 200,
+    r: 255,
+    a: 255,
+};
+
 const GREEN: PixelBGRA = PixelBGRA {
     b: 0,
     g: 255,
@@ -55,14 +63,6 @@ const BLUE: PixelBGRA = PixelBGRA {
     b: 255,
     g: 128,
     r: 64,
-    a: 255,
-};
-
-#[allow(dead_code)]
-const YELLOW: PixelBGRA = PixelBGRA {
-    b: 0,
-    g: 200,
-    r: 255,
     a: 255,
 };
 
