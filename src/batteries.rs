@@ -60,7 +60,7 @@ impl Translation {
         GridPosition {
             x: ((self.x + 1.0) * (width / 2) as f32) as u16,
             y: ((self.y + 1.0) * (height / 2) as f32) as u16,
-            z: self.z as u16,
+            z: ((self.z + 1.0) * 255. / 2.) as u16,
         }
     }
 }

@@ -17,7 +17,14 @@ pub fn triangle(
     line(c.position, a.position, pixel_data, width, color);
 }
 
-pub fn triangle_filled(a: Vertex, b: Vertex, c: Vertex, pixel_data: &mut [PixelBGRA], width: u16) {
+pub fn triangle_filled(
+    a: Vertex,
+    b: Vertex,
+    c: Vertex,
+    pixel_data: &mut [PixelBGRA],
+    depth_data: &mut [PixelBGRA],
+    width: u16,
+) {
     let a_pos = a.position;
     let b_pos = b.position;
     let c_pos = c.position;
@@ -38,6 +45,7 @@ pub fn triangle_filled(a: Vertex, b: Vertex, c: Vertex, pixel_data: &mut [PixelB
     for y in bounding_box.0.y..bounding_box.1.y {
         for x in bounding_box.0.x..bounding_box.1.x {
             let p = GridPosition { x, y, z: 1 };
+
             let alpha = signed_triangle_area(a_pos, b_pos, p) / area;
             let beta = signed_triangle_area(p, b_pos, c_pos) / area;
             let gamma = signed_triangle_area(a_pos, p, c_pos) / area;
@@ -46,12 +54,24 @@ pub fn triangle_filled(a: Vertex, b: Vertex, c: Vertex, pixel_data: &mut [PixelB
                 continue;
             }
             let z = alpha * az + beta * bz + gamma * cz;
-            pixel_data[p.to_idx(width)] = PixelBGRA {
-                b: (a_color.b * alpha + b_color.b * beta + c_color.b * gamma) as u8,
-                g: (a_color.g * alpha + b_color.g * beta + c_color.g * gamma) as u8,
-                r: (a_color.r * alpha + b_color.r * beta + c_color.r * gamma) as u8,
-                a: z as u8,
-            };
+            let pixel_idx = p.to_idx(width);
+            let existing_z = depth_data[pixel_idx];
+
+            if z > (existing_z.a as f32) {
+                depth_data[pixel_idx] = PixelBGRA {
+                    a: (z as u8).max(depth_data[pixel_idx].a),
+                    b: 255,
+                    g: 255,
+                    r: 255,
+                };
+
+                pixel_data[pixel_idx] = PixelBGRA {
+                    b: (a_color.b * alpha + b_color.b * beta + c_color.b * gamma) as u8,
+                    g: (a_color.g * alpha + b_color.g * beta + c_color.g * gamma) as u8,
+                    r: (a_color.r * alpha + b_color.r * beta + c_color.r * gamma) as u8,
+                    a: z as u8,
+                };
+            }
         }
     }
 }
