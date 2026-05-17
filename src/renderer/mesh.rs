@@ -28,13 +28,14 @@ pub fn render_mesh(
         ((height as i32) * 7) / 8,
     );
 
+    let view_proj = projection * model_view;
+
     for face in &mesh.faces {
         // Assemble the primitive in clip space; the rasterizer handles the
         // perspective divide, viewport mapping, and depth test.
         let clip: [Vec4; 3] = [0, 1, 2].map(|i| {
             let v = mesh.vertices[face.vertices[i]];
-            projection
-                * model_view
+            view_proj
                 * Vec4 {
                     x: v.x,
                     y: v.y,
