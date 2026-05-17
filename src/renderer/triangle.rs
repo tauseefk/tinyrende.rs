@@ -68,7 +68,7 @@ pub fn rasterize(
 }
 
 fn get_screen_bounding_box(a: Vec4, b: Vec4, c: Vec4) -> (Vec4, Vec4) {
-    vec![a, b, c].iter().fold((a, b), |acc, curr| {
+    [a, b, c].iter().fold((a, b), |acc, curr| {
         (
             Vec4 {
                 x: acc.0.x.min(curr.x),

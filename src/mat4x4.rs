@@ -122,8 +122,8 @@ impl Mul for Mat4x4 {
 
     fn mul(self, rhs: Self) -> Self::Output {
         let mut data = [[0.0f32; 4]; 4];
-        for i in 0..4 {
-            for j in 0..4 {
+        for (i, _) in self.data.iter().enumerate() {
+            for (j, _) in rhs.data.iter().enumerate() {
                 data[i][j] = self.data[i][0] * rhs.data[0][j]
                     + self.data[i][1] * rhs.data[1][j]
                     + self.data[i][2] * rhs.data[2][j]
