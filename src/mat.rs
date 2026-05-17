@@ -14,6 +14,20 @@ impl<const N: usize> Mat<N> {
     pub fn new(data: [[f32; N]; N]) -> Self {
         Self { data }
     }
+
+    #[allow(dead_code)]
+    pub fn identity() -> Self {
+        Self {
+            data: std::array::from_fn(|i| std::array::from_fn(|j| if i == j { 1.0 } else { 0.0 })),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn transpose(&self) -> Self {
+        Self {
+            data: std::array::from_fn(|i| std::array::from_fn(|j| self.data[j][i])),
+        }
+    }
 }
 
 impl<const N: usize> Mul for Mat<N> {
@@ -22,9 +36,7 @@ impl<const N: usize> Mul for Mat<N> {
     fn mul(self, rhs: Self) -> Self {
         Self {
             data: std::array::from_fn(|i| {
-                std::array::from_fn(|j| {
-                    (0..N).map(|k| self.data[i][k] * rhs.data[k][j]).sum()
-                })
+                std::array::from_fn(|j| (0..N).map(|k| self.data[i][k] * rhs.data[k][j]).sum())
             }),
         }
     }
@@ -129,5 +141,284 @@ impl Mul<Vec4> for Mat<4> {
             z: r[2],
             w: r[3],
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const EPS: f32 = 1e-4;
+
+    fn approx_eq(a: f32, b: f32) -> bool {
+        (a - b).abs() < EPS
+    }
+
+    fn mat_approx_eq<const N: usize>(a: &Mat<N>, b: &Mat<N>) -> bool {
+        (0..N).all(|i| (0..N).all(|j| approx_eq(a.data[i][j], b.data[i][j])))
+    }
+
+    fn vec3_approx_eq(a: Vec3, b: Vec3) -> bool {
+        approx_eq(a.x, b.x) && approx_eq(a.y, b.y) && approx_eq(a.z, b.z)
+    }
+
+    fn vec4_approx_eq(a: Vec4, b: Vec4) -> bool {
+        approx_eq(a.x, b.x) && approx_eq(a.y, b.y) && approx_eq(a.z, b.z) && approx_eq(a.w, b.w)
+    }
+
+    fn a3() -> Mat3x3 {
+        Mat::new([[1.0, 2.0, 3.0], [0.0, 1.0, 4.0], [5.0, 6.0, 0.0]])
+    }
+    fn b3() -> Mat3x3 {
+        Mat::new([[2.0, 0.0, 1.0], [3.0, 1.0, 0.0], [1.0, 1.0, 1.0]])
+    }
+    fn c3() -> Mat3x3 {
+        Mat::new([[1.0, 1.0, 0.0], [0.0, 2.0, 1.0], [1.0, 0.0, 3.0]])
+    }
+
+    fn a4() -> Mat4x4 {
+        Mat::new([
+            [1.0, 2.0, 3.0, 4.0],
+            [0.0, 1.0, 2.0, 3.0],
+            [1.0, 0.0, 1.0, 0.0],
+            [2.0, 1.0, 0.0, 1.0],
+        ])
+    }
+    fn b4() -> Mat4x4 {
+        Mat::new([
+            [2.0, 0.0, 1.0, 0.0],
+            [1.0, 1.0, 0.0, 2.0],
+            [0.0, 3.0, 1.0, 1.0],
+            [1.0, 0.0, 2.0, 1.0],
+        ])
+    }
+    fn c4() -> Mat4x4 {
+        Mat::new([
+            [1.0, 0.0, 0.0, 1.0],
+            [0.0, 1.0, 2.0, 0.0],
+            [3.0, 0.0, 1.0, 0.0],
+            [0.0, 2.0, 0.0, 1.0],
+        ])
+    }
+
+    #[test]
+    fn mat3_identity_right() {
+        let m = a3();
+        assert!(mat_approx_eq(&(m * Mat3x3::identity()), &m));
+    }
+
+    #[test]
+    fn mat3_identity_left() {
+        let m = a3();
+        assert!(mat_approx_eq(&(Mat3x3::identity() * m), &m));
+    }
+
+    #[test]
+    fn mat4_identity_right() {
+        let m = a4();
+        assert!(mat_approx_eq(&(m * Mat4x4::identity()), &m));
+    }
+
+    #[test]
+    fn mat4_identity_left() {
+        let m = a4();
+        assert!(mat_approx_eq(&(Mat4x4::identity() * m), &m));
+    }
+
+    #[test]
+    fn mat3_matmul_associative() {
+        let (a, b, c) = (a3(), b3(), c3());
+        assert!(mat_approx_eq(&((a * b) * c), &(a * (b * c))));
+    }
+
+    #[test]
+    fn mat4_matmul_associative() {
+        let (a, b, c) = (a4(), b4(), c4());
+        assert!(mat_approx_eq(&((a * b) * c), &(a * (b * c))));
+    }
+
+    #[test]
+    fn mat3_transpose_involution() {
+        let m = a3();
+        assert!(mat_approx_eq(&m.transpose().transpose(), &m));
+    }
+
+    #[test]
+    fn mat4_transpose_involution() {
+        let m = a4();
+        assert!(mat_approx_eq(&m.transpose().transpose(), &m));
+    }
+
+    #[test]
+    fn mat3_det_of_identity_is_one() {
+        assert!(approx_eq(Mat3x3::identity().determinant(), 1.0));
+    }
+
+    #[test]
+    fn mat3_det_of_product() {
+        let (a, b) = (a3(), b3());
+        assert!(approx_eq(
+            (a * b).determinant(),
+            a.determinant() * b.determinant(),
+        ));
+    }
+
+    #[test]
+    fn mat3_cofactor_expansion_row_0() {
+        let m = a3();
+        let expanded = m.data[0][0] * m.cofactor(0, 0)
+            + m.data[0][1] * m.cofactor(0, 1)
+            + m.data[0][2] * m.cofactor(0, 2);
+        assert!(approx_eq(m.determinant(), expanded));
+    }
+
+    #[test]
+    fn mat3_cofactor_expansion_row_1() {
+        let m = a3();
+        let expanded = m.data[1][0] * m.cofactor(1, 0)
+            + m.data[1][1] * m.cofactor(1, 1)
+            + m.data[1][2] * m.cofactor(1, 2);
+        assert!(approx_eq(m.determinant(), expanded));
+    }
+
+    #[test]
+    fn mat3_cofactor_expansion_row_2() {
+        let m = a3();
+        let expanded = m.data[2][0] * m.cofactor(2, 0)
+            + m.data[2][1] * m.cofactor(2, 1)
+            + m.data[2][2] * m.cofactor(2, 2);
+        assert!(approx_eq(m.determinant(), expanded));
+    }
+
+    #[test]
+    fn mat3_invert_transpose_roundtrip() {
+        let m = a3();
+        let result = m * m.invert_transpose().transpose();
+        assert!(mat_approx_eq(&result, &Mat3x3::identity()));
+    }
+
+    #[test]
+    fn mat4_look_at_maps_center_to_origin() {
+        let eye = Vec3::new(3.0, 4.0, 5.0);
+        let center = Vec3::new(0.0, 0.0, 0.0);
+        let up = Vec3::new(0.0, 1.0, 0.0);
+        let m = Mat4x4::look_at(eye, center, up);
+        let result = m * Vec4 {
+            x: center.x,
+            y: center.y,
+            z: center.z,
+            w: 1.0,
+        };
+        assert!(vec4_approx_eq(
+            result,
+            Vec4 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+                w: 1.0
+            }
+        ));
+    }
+
+    #[test]
+    fn mat4_look_at_eye_distance() {
+        let eye = Vec3::new(3.0, 4.0, 5.0);
+        let center = Vec3::new(0.0, 0.0, 0.0);
+        let up = Vec3::new(0.0, 1.0, 0.0);
+        let m = Mat4x4::look_at(eye, center, up);
+        let result = m * Vec4 {
+            x: eye.x,
+            y: eye.y,
+            z: eye.z,
+            w: 1.0,
+        };
+        let dist = (eye - center).length();
+        assert!(vec4_approx_eq(
+            result,
+            Vec4 {
+                x: 0.0,
+                y: 0.0,
+                z: dist,
+                w: 1.0
+            }
+        ));
+    }
+
+    #[test]
+    fn mat4_perspective_at_focal_distance_is_infinity() {
+        let f = 2.0;
+        let m = Mat4x4::perspective(f);
+        let result = m * Vec4 {
+            x: 1.0,
+            y: 2.0,
+            z: f,
+            w: 1.0,
+        };
+        assert!(approx_eq(result.w, 0.0));
+    }
+
+    #[test]
+    fn mat4_perspective_at_origin_is_identity_on_xyzw() {
+        let f = 2.0;
+        let m = Mat4x4::perspective(f);
+        let v = Vec4 {
+            x: 1.0,
+            y: 2.0,
+            z: 0.0,
+            w: 1.0,
+        };
+        assert!(vec4_approx_eq(m * v, v));
+    }
+
+    #[test]
+    fn mat4_viewport_corners() {
+        let (w, h) = (800, 600);
+        let m = Mat4x4::viewport(0, 0, w, h);
+        let bl = m * Vec4 {
+            x: -1.0,
+            y: -1.0,
+            z: 0.0,
+            w: 1.0,
+        };
+        let tr = m * Vec4 {
+            x: 1.0,
+            y: 1.0,
+            z: 0.0,
+            w: 1.0,
+        };
+        assert!(approx_eq(bl.x, 0.0) && approx_eq(bl.y, 0.0));
+        assert!(approx_eq(tr.x, w as f32) && approx_eq(tr.y, h as f32));
+    }
+
+    #[test]
+    fn mat3_vec3_mul_against_explicit() {
+        let m = Mat3x3::new([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]);
+        let v = Vec3::new(1.0, 2.0, 3.0);
+        assert!(vec3_approx_eq(m * v, Vec3::new(14.0, 32.0, 50.0)));
+    }
+
+    #[test]
+    fn mat4_vec4_mul_against_explicit() {
+        let m = Mat4x4::new([
+            [1.0, 2.0, 3.0, 4.0],
+            [5.0, 6.0, 7.0, 8.0],
+            [9.0, 10.0, 11.0, 12.0],
+            [13.0, 14.0, 15.0, 16.0],
+        ]);
+        let v = Vec4 {
+            x: 1.0,
+            y: 1.0,
+            z: 1.0,
+            w: 1.0,
+        };
+        assert!(vec4_approx_eq(
+            m * v,
+            Vec4 {
+                x: 10.0,
+                y: 26.0,
+                z: 42.0,
+                w: 58.0
+            },
+        ));
     }
 }
