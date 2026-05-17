@@ -14,42 +14,6 @@ pub fn random_color() -> PixelBGRA {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct GridPosition {
-    pub x: u16,
-    pub y: u16,
-    pub z: u16,
-}
-
-impl GridPosition {
-    pub fn to_idx(&self, width: u16) -> usize {
-        (self.y as usize) * width as usize + (self.x as usize)
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Vertex {
-    pub position: GridPosition,
-    pub color: PixelBGRA,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct FloatColor {
-    pub b: f32,
-    pub r: f32,
-    pub g: f32,
-}
-
-impl From<PixelBGRA> for FloatColor {
-    fn from(color: PixelBGRA) -> Self {
-        FloatColor {
-            b: color.b as f32,
-            r: color.r as f32,
-            g: color.g as f32,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,
@@ -96,4 +60,12 @@ impl Sub for Vec3 {
             z: self.z - rhs.z,
         }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Vec4 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
 }

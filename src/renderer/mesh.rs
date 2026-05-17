@@ -3,8 +3,8 @@ use std::{fs::File, io::BufReader, path::Path};
 use anyhow::Error;
 use tgar::PixelBGRA;
 
-use crate::batteries::{Vec3, random_color};
-use crate::mat4x4::{Mat4x4, Vec4};
+use crate::batteries::{Vec3, Vec4, random_color};
+use crate::mat4x4::Mat4x4;
 use crate::obj;
 use crate::renderer::triangle::rasterize;
 

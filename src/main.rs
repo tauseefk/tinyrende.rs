@@ -9,9 +9,7 @@ use anyhow::Error;
 use clap::{Arg, Command, command};
 use tgar::{BGRA, PixelBGRA};
 
-use crate::batteries::{GridPosition, Vertex};
 use crate::renderer::mesh::render_mesh;
-use crate::renderer::triangle::triangle_filled;
 
 const IMAGE_SIZE: u16 = 512;
 
@@ -20,51 +18,6 @@ const TRANSPARENT: PixelBGRA = PixelBGRA {
     g: 0,
     r: 0,
     a: 0,
-};
-
-#[allow(dead_code)]
-const BLACK: PixelBGRA = PixelBGRA {
-    b: 0,
-    g: 0,
-    r: 0,
-    a: 255,
-};
-
-#[allow(dead_code)]
-const WHITE: PixelBGRA = PixelBGRA {
-    b: 255,
-    g: 255,
-    r: 255,
-    a: 255,
-};
-
-#[allow(dead_code)]
-const YELLOW: PixelBGRA = PixelBGRA {
-    b: 0,
-    g: 200,
-    r: 255,
-    a: 255,
-};
-
-const GREEN: PixelBGRA = PixelBGRA {
-    b: 0,
-    g: 255,
-    r: 0,
-    a: 255,
-};
-
-const RED: PixelBGRA = PixelBGRA {
-    b: 0,
-    g: 0,
-    r: 255,
-    a: 255,
-};
-
-const BLUE: PixelBGRA = PixelBGRA {
-    b: 255,
-    g: 128,
-    r: 64,
-    a: 255,
 };
 
 fn main() -> Result<(), Error> {
@@ -98,34 +51,6 @@ fn main() -> Result<(), Error> {
                 width,
                 height,
             )?;
-        }
-        Some(("triangle", _)) => {
-            let mut z_buffer = vec![0_u8; width as usize * height as usize];
-            let a = Vertex {
-                position: GridPosition {
-                    x: 100,
-                    y: 50,
-                    z: 13,
-                },
-                color: RED,
-            };
-            let b = Vertex {
-                position: GridPosition {
-                    x: 400,
-                    y: 450,
-                    z: 128,
-                },
-                color: GREEN,
-            };
-            let c = Vertex {
-                position: GridPosition {
-                    x: 50,
-                    y: 350,
-                    z: 255,
-                },
-                color: BLUE,
-            };
-            triangle_filled(a, b, c, &mut frame_buffer, &mut z_buffer, width, height);
         }
         _ => unreachable!(),
     }

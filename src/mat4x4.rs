@@ -1,14 +1,6 @@
 use std::ops::Mul;
 
-use crate::batteries::Vec3;
-
-#[derive(Debug, Clone, Copy)]
-pub struct Vec4 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-    pub w: f32,
-}
+use crate::batteries::{Vec3, Vec4};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Mat3x3 {
@@ -38,7 +30,6 @@ impl Mat3x3 {
 
     pub fn invert_transpose(&self) -> Mat3x3 {
         let det = self.determinant();
-        let m = &self.data;
         Mat3x3::new([
             [
                 self.cofactor(0, 0) / det,
