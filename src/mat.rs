@@ -3,15 +3,34 @@ use std::ops::Mul;
 use crate::batteries::{Vec3, Vec4};
 
 #[derive(Debug, Clone, Copy)]
-pub struct Mat3x3 {
-    data: [[f32; 3]; 3],
+pub struct Mat<const N: usize> {
+    data: [[f32; N]; N],
 }
 
-impl Mat3x3 {
-    pub fn new(data: [[f32; 3]; 3]) -> Self {
+pub type Mat3x3 = Mat<3>;
+pub type Mat4x4 = Mat<4>;
+
+impl<const N: usize> Mat<N> {
+    pub fn new(data: [[f32; N]; N]) -> Self {
         Self { data }
     }
+}
 
+impl<const N: usize> Mul for Mat<N> {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self {
+        Self {
+            data: std::array::from_fn(|i| {
+                std::array::from_fn(|j| {
+                    (0..N).map(|k| self.data[i][k] * rhs.data[k][j]).sum()
+                })
+            }),
+        }
+    }
+}
+
+impl Mat<3> {
     pub fn determinant(&self) -> f32 {
         let m = &self.data;
         m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
@@ -28,46 +47,15 @@ impl Mat3x3 {
         m[i0][j0] * m[i1][j1] - m[i0][j1] * m[i1][j0]
     }
 
-    pub fn invert_transpose(&self) -> Mat3x3 {
+    pub fn invert_transpose(&self) -> Self {
         let det = self.determinant();
-        Mat3x3::new([
-            [
-                self.cofactor(0, 0) / det,
-                self.cofactor(0, 1) / det,
-                self.cofactor(0, 2) / det,
-            ],
-            [
-                self.cofactor(1, 0) / det,
-                self.cofactor(1, 1) / det,
-                self.cofactor(1, 2) / det,
-            ],
-            [
-                self.cofactor(2, 0) / det,
-                self.cofactor(2, 1) / det,
-                self.cofactor(2, 2) / det,
-            ],
-        ])
+        Self::new(std::array::from_fn(|i| {
+            std::array::from_fn(|j| self.cofactor(i, j) / det)
+        }))
     }
 }
 
-impl Mul<Vec3> for Mat3x3 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: Vec3) -> Vec3 {
-        Vec3::new(
-            self.data[0][0] * rhs.x + self.data[0][1] * rhs.y + self.data[0][2] * rhs.z,
-            self.data[1][0] * rhs.x + self.data[1][1] * rhs.y + self.data[1][2] * rhs.z,
-            self.data[2][0] * rhs.x + self.data[2][1] * rhs.y + self.data[2][2] * rhs.z,
-        )
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Mat4x4 {
-    data: [[f32; 4]; 4],
-}
-
-impl Mat4x4 {
+impl Mat<4> {
     pub fn viewport(x: i32, y: i32, width: i32, height: i32) -> Self {
         Self {
             data: [
@@ -117,44 +105,29 @@ impl Mat4x4 {
     }
 }
 
-impl Mul for Mat4x4 {
-    type Output = Mat4x4;
+fn transform<const N: usize>(m: [[f32; N]; N], v: [f32; N]) -> [f32; N] {
+    std::array::from_fn(|i| (0..N).map(|j| m[i][j] * v[j]).sum())
+}
 
-    fn mul(self, rhs: Self) -> Self::Output {
-        let mut data = [[0.0f32; 4]; 4];
-        for (i, _) in self.data.iter().enumerate() {
-            for (j, _) in rhs.data.iter().enumerate() {
-                data[i][j] = self.data[i][0] * rhs.data[0][j]
-                    + self.data[i][1] * rhs.data[1][j]
-                    + self.data[i][2] * rhs.data[2][j]
-                    + self.data[i][3] * rhs.data[3][j];
-            }
-        }
-        Self::Output { data }
+impl Mul<Vec3> for Mat<3> {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Vec3 {
+        let r = transform(self.data, [rhs.x, rhs.y, rhs.z]);
+        Vec3::new(r[0], r[1], r[2])
     }
 }
 
-impl Mul<Vec4> for Mat4x4 {
+impl Mul<Vec4> for Mat<4> {
     type Output = Vec4;
 
-    fn mul(self, rhs: Vec4) -> Self::Output {
-        Self::Output {
-            x: self.data[0][0] * rhs.x
-                + self.data[0][1] * rhs.y
-                + self.data[0][2] * rhs.z
-                + self.data[0][3] * rhs.w,
-            y: self.data[1][0] * rhs.x
-                + self.data[1][1] * rhs.y
-                + self.data[1][2] * rhs.z
-                + self.data[1][3] * rhs.w,
-            z: self.data[2][0] * rhs.x
-                + self.data[2][1] * rhs.y
-                + self.data[2][2] * rhs.z
-                + self.data[2][3] * rhs.w,
-            w: self.data[3][0] * rhs.x
-                + self.data[3][1] * rhs.y
-                + self.data[3][2] * rhs.z
-                + self.data[3][3] * rhs.w,
+    fn mul(self, rhs: Vec4) -> Vec4 {
+        let r = transform(self.data, [rhs.x, rhs.y, rhs.z, rhs.w]);
+        Vec4 {
+            x: r[0],
+            y: r[1],
+            z: r[2],
+            w: r[3],
         }
     }
 }
