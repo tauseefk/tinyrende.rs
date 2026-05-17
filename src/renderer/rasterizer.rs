@@ -1,7 +1,7 @@
 use tgar::PixelBGRA;
 
 use crate::batteries::{Vec3, Vec4};
-use crate::mat4x4::{Mat3x3, Mat4x4};
+use crate::mat::{Mat3x3, Mat4x4};
 
 /// Rasterize a single triangle defined by three clip-space vertices.
 ///

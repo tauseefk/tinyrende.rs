@@ -4,9 +4,9 @@ use anyhow::Error;
 use tgar::PixelBGRA;
 
 use crate::batteries::{Vec3, Vec4, random_color};
-use crate::mat4x4::Mat4x4;
+use crate::mat::Mat4x4;
 use crate::obj;
-use crate::renderer::triangle::rasterize;
+use crate::renderer::rasterizer::rasterize;
 
 pub fn render_mesh(
     path: &Path,

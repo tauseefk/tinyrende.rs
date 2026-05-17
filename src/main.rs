@@ -1,5 +1,5 @@
 mod batteries;
-mod mat4x4;
+mod mat;
 mod obj;
 mod renderer;
 
