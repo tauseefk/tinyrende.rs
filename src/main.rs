@@ -20,6 +20,13 @@ const TRANSPARENT: PixelBGRA = PixelBGRA {
     a: 0,
 };
 
+const DEFAULT_COLOR: PixelBGRA = PixelBGRA {
+    b: 255,
+    g: 100,
+    r: 0,
+    a: 255,
+};
+
 fn main() -> Result<(), Error> {
     let matches = command!()
         .subcommand_required(true)
@@ -55,9 +62,7 @@ fn main() -> Result<(), Error> {
         _ => unreachable!(),
     }
 
-    // tgar hard-codes the TGA header's upper-left-origin bit, so viewers
-    // treat row 0 as the top of the image. Our projection keeps the mesh's
-    // +Y-up convention, so mirror the rows here to compensate for tgar.
+    // y-flip to accomodate tgar's y-down convention
     let w = width as usize;
     let h = height as usize;
     for row in 0..h / 2 {

@@ -15,6 +15,16 @@ pub struct Mesh {
     pub faces: Vec<Face>,
 }
 
+impl Mesh {
+    pub fn vertex(&self, face_idx: usize, vertex_idx: usize) -> Vec3 {
+        let face = self.faces.get(face_idx).unwrap();
+        // faces only store indices of vertices
+        // this vertex_id corresponds to the index in the larger array
+        let vertex_idx = face.vertices.get(vertex_idx).unwrap();
+        *self.vertices.get(*vertex_idx).unwrap()
+    }
+}
+
 pub fn parse(mut reader: impl BufRead) -> Result<Mesh, Error> {
     let mut mesh = Mesh::default();
     let mut buf = String::new();
