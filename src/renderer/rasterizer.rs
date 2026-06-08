@@ -5,6 +5,7 @@ use tgar::PixelBGRA;
 use crate::batteries::{Vec3, Vec4};
 use crate::mat::{Mat3x3, Mat4x4};
 use crate::obj::Mesh;
+use crate::renderer::mesh::FrameBuffer;
 
 pub trait Shader {
     fn vertex(&mut self, face_idx: usize, vert_idx: usize) -> Vec4;
@@ -29,6 +30,7 @@ impl<'rast> Shader for SomeShader<'rast> {
             z: v.z,
             w: 1.0,
         });
+        // this currently doesn't accomplish anything
         self.triangle[vert_idx] = v;
         self.perspective.mul(v)
     }
@@ -44,10 +46,8 @@ pub fn rasterize(
     clip_triangle: [Vec4; 3],
     viewport: Mat4x4,
     shader: &SomeShader,
-    frame_buffer: &mut [PixelBGRA],
+    frame_buffer: &mut FrameBuffer,
     depth_buffer: &mut [f32],
-    width: u16,
-    height: u16,
 ) {
     let triangle_ndc = clip_triangle.map(|v: Vec4| Vec4 {
         x: v.x / v.w,
@@ -79,9 +79,9 @@ pub fn rasterize(
 
     let bounding_box = get_screen_bounding_box(s0, s1, s2);
     let min_x = bounding_box.0.x.max(0.0) as i32;
-    let max_x = bounding_box.1.x.min((width - 1) as f32) as i32;
+    let max_x = bounding_box.1.x.min((frame_buffer.width - 1) as f32) as i32;
     let min_y = bounding_box.0.y.max(0.0) as i32;
-    let max_y = bounding_box.1.y.min((height - 1) as f32) as i32;
+    let max_y = bounding_box.1.y.min((frame_buffer.height - 1) as f32) as i32;
 
     for y in min_y..=max_y {
         for x in min_x..=max_x {
@@ -92,16 +92,17 @@ pub fn rasterize(
 
             // depth interpolation in NDC space
             let z = barycenter.x * z0 + barycenter.y * z1 + barycenter.z * z2;
-            let idx = y as usize * width as usize + x as usize;
+            let idx = y as usize * frame_buffer.width as usize + x as usize;
             if z <= depth_buffer[idx] {
                 continue;
             }
-            depth_buffer[idx] = z;
             let (discard, color) = shader.fragment();
-
-            if !discard {
-                frame_buffer[idx] = color;
+            if discard {
+                continue;
             }
+
+            depth_buffer[idx] = z;
+            frame_buffer.data[idx] = color;
         }
     }
 }

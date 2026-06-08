@@ -19,7 +19,7 @@ impl Mesh {
     pub fn vertex(&self, face_idx: usize, vertex_idx: usize) -> Vec3 {
         let face = self.faces.get(face_idx).unwrap();
         // faces only store indices of vertices
-        // this vertex_id corresponds to the index in the larger array
+        // this vertex_id corresponds to the entire model's vertex array
         let vertex_idx = face.vertices.get(vertex_idx).unwrap();
         *self.vertices.get(*vertex_idx).unwrap()
     }

@@ -9,7 +9,7 @@ use anyhow::Error;
 use clap::{Arg, Command, command};
 use tgar::{BGRA, PixelBGRA};
 
-use crate::renderer::mesh::render_mesh;
+use crate::renderer::mesh::{FrameBuffer, render_mesh};
 
 const IMAGE_SIZE: u16 = 512;
 
@@ -41,23 +41,19 @@ fn main() -> Result<(), Error> {
     let width: u16 = IMAGE_SIZE;
     let height: u16 = IMAGE_SIZE;
 
-    let mut frame_buffer = vec![TRANSPARENT; width as usize * height as usize];
+    let mut frame_buffer = FrameBuffer {
+        data: vec![TRANSPARENT; width as usize * height as usize],
+        width,
+        height,
+    };
 
     match matches.subcommand() {
         Some(("mesh", sub)) => {
             let path = sub
                 .get_one::<String>("path")
                 .ok_or_else(|| Error::msg("missing path"))?;
-            // The mesh rasterizer interpolates NDC z (in [-1, 1]) as f32 and
-            // mirrors the tinyrenderer reference's `-DBL_MAX` initial value.
-            let mut z_buffer = vec![f32::NEG_INFINITY; width as usize * height as usize];
-            render_mesh(
-                Path::new(path),
-                &mut frame_buffer,
-                &mut z_buffer,
-                width,
-                height,
-            )?;
+            let mut depth_buffer = vec![f32::NEG_INFINITY; width as usize * height as usize];
+            render_mesh(Path::new(path), &mut frame_buffer, &mut depth_buffer)?;
         }
         _ => unreachable!(),
     }
@@ -69,11 +65,11 @@ fn main() -> Result<(), Error> {
         let top = row * w;
         let bot = (h - 1 - row) * w;
         for col in 0..w {
-            frame_buffer.swap(top + col, bot + col);
+            frame_buffer.data.swap(top + col, bot + col);
         }
     }
 
-    let frame_buffer: BGRA = BGRA::new(width, height, &frame_buffer);
+    let frame_buffer: BGRA = BGRA::new(width, height, &frame_buffer.data);
 
     let mut file = File::create(Path::new("framebuffer.tga"))?;
     file.write_all(&frame_buffer.into_data())?;
