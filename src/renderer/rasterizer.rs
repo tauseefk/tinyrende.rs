@@ -1,51 +1,14 @@
-use std::ops::Mul;
-
-use tgar::PixelBGRA;
-
 use crate::batteries::{Vec3, Vec4};
 use crate::mat::{Mat3x3, Mat4x4};
-use crate::obj::Mesh;
 use crate::renderer::mesh::FrameBuffer;
-
-pub trait Shader {
-    fn vertex(&mut self, face_idx: usize, vert_idx: usize) -> Vec4;
-
-    fn fragment(&self) -> (bool, PixelBGRA);
-}
-
-pub struct SomeShader<'rast> {
-    pub model: &'rast Mesh,
-    pub color: PixelBGRA,
-    pub triangle: [Vec4; 3],
-    pub model_view: Mat4x4,
-    pub perspective: Mat4x4,
-}
-
-impl<'rast> Shader for SomeShader<'rast> {
-    fn vertex(&mut self, face_idx: usize, vert_idx: usize) -> Vec4 {
-        let v: Vec3 = self.model.vertex(face_idx, vert_idx);
-        let v: Vec4 = self.model_view.mul(Vec4 {
-            x: v.x,
-            y: v.y,
-            z: v.z,
-            w: 1.0,
-        });
-        // this currently doesn't accomplish anything
-        self.triangle[vert_idx] = v;
-        self.perspective.mul(v)
-    }
-
-    fn fragment(&self) -> (bool, PixelBGRA) {
-        (false, self.color)
-    }
-}
+use crate::renderer::shader::{PhongShader, Shader};
 
 /// Rasterize a single triangle defined by three clip-space vertices.
 ///
 pub fn rasterize(
     clip_triangle: [Vec4; 3],
     viewport: Mat4x4,
-    shader: &SomeShader,
+    shader: &PhongShader,
     frame_buffer: &mut FrameBuffer,
     depth_buffer: &mut [f32],
 ) {

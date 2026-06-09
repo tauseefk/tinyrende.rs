@@ -20,6 +20,7 @@ const TRANSPARENT: PixelBGRA = PixelBGRA {
     a: 0,
 };
 
+#[allow(dead_code)]
 const DEFAULT_COLOR: PixelBGRA = PixelBGRA {
     b: 255,
     g: 100,

@@ -3,10 +3,11 @@ use std::{fs::File, io::BufReader, path::Path};
 use anyhow::Error;
 use tgar::PixelBGRA;
 
-use crate::batteries::{Vec3, Vec4, random_color};
+use crate::batteries::{Vec3, Vec4};
 use crate::mat::Mat4x4;
-use crate::renderer::rasterizer::{Shader, SomeShader, rasterize};
-use crate::{DEFAULT_COLOR, obj};
+use crate::obj;
+use crate::renderer::rasterizer::rasterize;
+use crate::renderer::shader::{PhongShader, Shader};
 
 pub struct FrameBuffer {
     pub data: Vec<PixelBGRA>,
@@ -32,18 +33,10 @@ pub fn render_mesh(
         ((frame_buffer.height as i32) * 7) / 8,
     );
 
-    let mut shader: SomeShader = SomeShader {
-        model: &mesh,
-        model_view,
-        perspective,
-        color: DEFAULT_COLOR,
-        triangle: [Vec4::zero(), Vec4::zero(), Vec4::zero()],
-    };
+    let mut shader = PhongShader::new(&mesh, Vec3::new(1., 1., 1.), model_view, perspective);
 
     for (f, _) in mesh.faces.iter().enumerate() {
         let clip_triangle: [Vec4; 3] = [0, 1, 2].map(|v| shader.vertex(f, v));
-
-        shader.color = random_color();
 
         rasterize(clip_triangle, viewport, &shader, frame_buffer, depth_buffer);
     }
