@@ -1,4 +1,4 @@
-use std::ops::Sub;
+use std::ops::{Add, Sub};
 
 use rand::RngExt;
 use tgar::PixelBGRA;
@@ -79,6 +79,18 @@ impl Sub for Vec3 {
             x: self.x - rhs.x,
             y: self.y - rhs.y,
             z: self.z - rhs.z,
+        }
+    }
+}
+
+impl Add for Vec3 {
+    type Output = Vec3;
+
+    fn add(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
         }
     }
 }

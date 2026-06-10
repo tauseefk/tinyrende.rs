@@ -68,6 +68,52 @@ impl Mat<3> {
 }
 
 impl Mat<4> {
+    pub fn determinant(&self) -> f32 {
+        let m = &self.data;
+
+        let sub = |r0: usize, r1: usize, r2: usize, c0: usize, c1: usize, c2: usize| -> f32 {
+            let minor = Mat3x3::new([
+                [m[r0][c0], m[r0][c1], m[r0][c2]],
+                [m[r1][c0], m[r1][c1], m[r1][c2]],
+                [m[r2][c0], m[r2][c1], m[r2][c2]],
+            ]);
+            minor.determinant()
+        };
+
+        m[0][0] * sub(1, 2, 3, 1, 2, 3) - m[0][1] * sub(1, 2, 3, 0, 2, 3)
+            + m[0][2] * sub(1, 2, 3, 0, 1, 3)
+            - m[0][3] * sub(1, 2, 3, 0, 1, 2)
+    }
+
+    pub fn cofactor(&self, row: usize, col: usize) -> f32 {
+        let m = &self.data;
+
+        // Indices for the rows and columns to keep (excluding `row` and `col`).
+        let rows: Vec<usize> = (0..4).filter(|&i| i != row).collect();
+        let cols: Vec<usize> = (0..4).filter(|&j| j != col).collect();
+
+        let minor = Mat3x3::new([
+            [
+                m[rows[0]][cols[0]],
+                m[rows[0]][cols[1]],
+                m[rows[0]][cols[2]],
+            ],
+            [
+                m[rows[1]][cols[0]],
+                m[rows[1]][cols[1]],
+                m[rows[1]][cols[2]],
+            ],
+            [
+                m[rows[2]][cols[0]],
+                m[rows[2]][cols[1]],
+                m[rows[2]][cols[2]],
+            ],
+        ]);
+
+        let sign = if (row + col) % 2 == 0 { 1.0 } else { -1.0 };
+        sign * minor.determinant()
+    }
+
     pub fn viewport(x: i32, y: i32, width: i32, height: i32) -> Self {
         Self {
             data: [
@@ -114,6 +160,13 @@ impl Mat<4> {
         };
 
         inverse_coordinate_transform_mat * translation_mat
+    }
+
+    pub fn invert_transpose(&self) -> Self {
+        let det = self.determinant();
+        Self::new(std::array::from_fn(|i| {
+            std::array::from_fn(|j| self.cofactor(i, j) / det)
+        }))
     }
 }
 

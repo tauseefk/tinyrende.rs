@@ -11,7 +11,7 @@ use crate::{
 pub trait Shader {
     fn vertex(&mut self, face_idx: usize, vert_idx: usize) -> Vec4;
 
-    fn fragment(&self) -> (bool, PixelBGRA);
+    fn fragment(&self, barycentric: Vec3) -> (bool, PixelBGRA);
 }
 
 #[allow(dead_code)]
@@ -37,7 +37,7 @@ impl<'rast> Shader for FlatShder<'rast> {
         self.perspective.mul(v)
     }
 
-    fn fragment(&self) -> (bool, PixelBGRA) {
+    fn fragment(&self, _barycentric: Vec3) -> (bool, PixelBGRA) {
         (false, self.color)
     }
 }
@@ -46,6 +46,7 @@ pub struct PhongShader<'rast> {
     pub model: &'rast Mesh,
     pub light: Vec3,
     pub triangle: [Vec3; 3],
+    pub varying_normal: [Vec3; 3],
     pub model_view: Mat4x4,
     pub perspective: Mat4x4,
 }
@@ -64,6 +65,7 @@ impl<'rast> PhongShader<'rast> {
                 .xyz()
                 .normalized(),
             triangle: [Vec3::zero(); 3],
+            varying_normal: [Vec3::zero(); 3],
             model_view,
             perspective,
         }
@@ -80,13 +82,25 @@ impl<'rast> Shader for PhongShader<'rast> {
             w: 1.0,
         });
         self.triangle[vert_idx] = v.xyz();
+        let n: Vec3 = self.model.vertex_normal(face_idx, vert_idx);
+        self.varying_normal[vert_idx] = (self.model_view.invert_transpose()
+            * Vec4 {
+                x: n.x,
+                y: n.y,
+                z: n.z,
+                w: 0.0,
+            })
+        .xyz();
         self.perspective.mul(v)
     }
 
-    fn fragment(&self) -> (bool, PixelBGRA) {
-        let normal: Vec3 = (self.triangle[1] - self.triangle[0])
-            .cross(self.triangle[2] - self.triangle[1])
-            .normalized();
+    fn fragment(&self, barycentric: Vec3) -> (bool, PixelBGRA) {
+        // let normal: Vec3 = (self.triangle[1] - self.triangle[0])
+        //     .cross(self.triangle[2] - self.triangle[1])
+        //     .normalized();
+        let normal = (self.varying_normal[0].mul(barycentric.x))
+            + (self.varying_normal[1].mul(barycentric.y))
+            + (self.varying_normal[2].mul(barycentric.z));
         let reflect: Vec3 = (normal.mul(2. * normal.dot(self.light)) - self.light).normalized();
         let ambient = 0.3;
         let diff = normal.dot(self.light).max(0.0);
