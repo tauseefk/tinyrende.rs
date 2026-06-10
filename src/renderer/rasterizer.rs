@@ -59,7 +59,7 @@ pub fn rasterize(
             if z <= depth_buffer[idx] {
                 continue;
             }
-            let (discard, color) = shader.fragment();
+            let (discard, color) = shader.fragment(barycenter);
             if discard {
                 continue;
             }
